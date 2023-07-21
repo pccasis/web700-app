@@ -1,0 +1,51 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    border: 1px solid pink;
+    padding: 8px;
+    text-align: left;
+    color:pink;
+    background-color: black;
+}
+
+tfoot{
+    font-weight: bold;
+}
+
+caption{
+    font-weight: bold;
+}
+p{
+    text-align: justify;
+}
+
+.nav-link {
+    color:pink !important;
+}
+
+.w3-brown {
+    color: #fff!important;
+    background: rgb(190,39,166);
+    background: linear-gradient(90deg, rgba(190,39,166,1) 0%, rgba(255,101,241,1) 47%, rgba(233,30,201,1) 100%);
+}
+
+.w3-brown, .w3-hover-brown:hover {
+    color: #fff!important;
+    background: rgb(190,39,166);
+    background: linear-gradient(90deg, rgba(190,39,166,1) 0%, rgba(255,101,241,1) 47%, rgba(233,30,201,1) 100%);
+}
+
+.w3-container, .w3-panel {
+    padding: 3.01em 20px !important;
+}
+
+.w3-yellow, .w3-hover-yellow:hover {
+    color: #000!important;
+    background-color: #ffeb3b!important;
+    position: relative !important;
+    left: 24em !important;
+    margin-top: 43px !important;
+    width: 30% !important;
+}

@@ -28,15 +28,33 @@ module.exports.initialize = function () {
     });
 }
 
-module.exports.getAllStudents = function(){
-    return new Promise((resolve,reject)=>{
-        if (dataCollection.students.length == 0) {
-            reject("query returned 0 results"); return;
+function addStudent(studentData){
+    return new Promise ((resolve, reject) => {
+        if (typeof studentData.TA === "undefined") {
+            studentData.TA = false;
+        } else {
+            studentData.TA = true;
         }
 
-        resolve(dataCollection.students);
-    })
+        studentData.studentNum = dataCollection.students.length + 1;
+
+        dataCollection.students.push(studentData);
+        resolve()
+    });
 }
+
+module.exports.addStudent = addStudent;
+
+
+module.exports.getAllStudents = function () {
+    return new Promise((resolve, reject) => {
+      if (dataCollection.students.length == 0) {
+        reject("query returned 0 results");
+        return;
+      }
+      resolve(dataCollection.students);
+    });
+  };
 
 module.exports.getTAs = function () {
     return new Promise(function (resolve, reject) {
@@ -102,4 +120,58 @@ module.exports.getStudentsByCourse = function (course) {
     });
 };
 
+module.exports.getCourseById = function (courseId) {
+    return new Promise((resolve, reject) => {
+      var courseFind = dataCollection.courses.find((course) => course.courseId === parseInt(courseId));
+  
+      if (courseFind) {
+        resolve(courseFind);
+      } else {
+        reject("No course found with the given courseId");
+      }
+    });
+  };
 
+  module.exports.getAllStudentsWithPromise = function () {
+    return new Promise((resolve, reject) => {
+      if (dataCollection.students.length == 0) {
+        reject("query returned 0 results");
+        return;
+      }
+      resolve(dataCollection.students);
+    });
+  };
+  
+
+
+
+
+  module.exports.updateStudent = function (studentData) {
+    return new Promise(function (resolve, reject) {
+      var studentToUpdate = dataCollection.students.find((student) => student.studentNum === parseInt(studentData.studentNum));
+  
+      if (!studentToUpdate) {
+        reject("Student not found");
+        return;
+      }
+  
+      studentToUpdate.firstName = studentData.firstName;
+      studentToUpdate.lastName = studentData.lastName;
+  
+      saveStudentsToFile();
+  
+      resolve(studentToUpdate);
+    });
+  };
+
+  function saveStudentsToFile() {
+    fs.writeFile("./data/students.json", JSON.stringify(dataCollection.students, null, 2), (err) => {
+      if (err) {
+        console.error("Error saving students data to file:", err);
+      } else {
+        console.log("Students data saved to file successfully.");
+      }
+    });
+  }
+
+  module.exports.saveStudentsToFile = saveStudentsToFile; 
