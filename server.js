@@ -47,11 +47,13 @@ app.engine('hbs', hbs.engine);
 
 
 
-collegeData.initialize()
+const sequappze = require('./modules/collegeData').sequappze;
+
+collegeData.initialize(sequappze, collegeData.Student, collegeData.Course)
     .then(() => {
         app.get('/', (req, res) => {
             res.render('home');
-          });
+        });
         
         app.get('/students', (req, res) => {
             collegeData.getAllStudents()
@@ -63,31 +65,35 @@ collegeData.initialize()
               });
           });
 
-        app.get('/students/add', (req, res) => {
-            res.render('addStudent');
-          });
+          app.get("/students/add", (req, res) => {
+            collegeData.getCourses().then((courses) => {
+                res.render("addStudent", { courses: courses });
+            }).catch(() => {
+                res.render("addStudent", { courses: [] });
+            });
+        });
 
-        app.post("/students/add", (req, res)=>{
+        app.post("/students/add", (req, res) => {
             collegeData.addStudent(req.body)
-            .then(()=>{
-                res.redirect("/students")
-            })
-            .catch((error)=>{
-                console.error(error)
-                res.redirect('ERROR' + error);
-            })
+                .then(() => {
+                    res.redirect("/students")
+                })
+                .catch((error) => {
+                    console.error(error)
+                    res.redirect('ERROR' + error);
+                })
         })
         app.post("/students/update", (req, res) => {
           collegeData
-            .updateStudent({ studentNum: parseInt(req.body.studentNum), ...req.body })
-            .then((updatedStudent) => {
-              res.redirect("/students");
-            })
-            .catch((error) => {
-              console.error(error);
-              res.redirect("/students");
-            });
-        });
+              .updateStudent({ studentNum: parseInt(req.body.studentNum), ...req.body })
+              .then((updatedStudent) => {
+                  res.redirect("/students");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/students");
+              });
+      });
         
         app.get("/tas", (req, res) => {
             collegeData.getTAs()
@@ -109,14 +115,71 @@ collegeData.initialize()
               });
         });
 
+        app.get('/courses/add', (req, res) => {
+          res.render('addCourse');
+        });
+        app.post("/courses/add", (req, res) => {
+          collegeData.addCourse(req.body)
+              .then(() => {
+                  res.redirect("/courses")
+              })
+              .catch((error) => {
+                  console.error(error)
+                  res.redirect('ERROR' + error);
+              })
+        })
+
+        app.post("/courses/update/:id", (req, res) => {
+          const courseId = parseInt(req.params.id);
+          collegeData
+            .updateCourse({ courseId, ...req.body })
+            .then((updatedCourse) => {
+              res.redirect("/courses");
+            })
+            .catch((error) => {
+              console.error(error);
+              res.redirect("/courses");
+            });
+        });
+
+        app.get('/courses/update/:courseId', (req, res) => {
+          const courseId = req.params.courseId;
+          collegeData.getCourseById(courseId)
+            .then((course) => {
+              if (course) {
+                res.render('updateCourse', { course });
+              } else {
+                res.render('courses', { message: 'Course not found' });
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+              res.render('courses', { message: 'Error retrieving course' });
+            });
+        });
+
+        
+
+        app.post("/courses/delete/:courseId", (req, res) => {
+          const courseId = parseInt(req.params.courseId);
+          collegeData.deleteCourse(courseId)
+              .then(() => {
+                  res.redirect("/courses");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/courses");
+              });
+      });
+
         app.get('/courses/:id', (req, res) => {
-            const courseId = req.params.id;
-            collegeData.getCourseById(courseId)
+          const courseId = req.params.id;
+          collegeData.getCourseById(courseId)
               .then((course) => {
-                res.render('course', { course });
+                  res.render('course', { course });
               })
               .catch((err) => {
-                res.render('course', { message: "no results" });
+                  res.render('course', { message: "no results" });
               });
         });
           
@@ -131,6 +194,57 @@ collegeData.initialize()
                 .catch((err) => {
                     res.render('student', { message: "no results" });
                 });
+        });
+
+        app.post("/students/update", (req, res) => {
+          collegeData
+              .updateStudent({ studentNum: parseInt(req.body.studentNum), ...req.body })
+              .then((updatedStudent) => {
+                  res.redirect("/students");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/students");
+              });
+      });
+
+        app.post("/students/delete/:studentNum", (req, res) => {
+          const studentNum = parseInt(req.params.studentNum);
+          collegeData.deleteStudent(studentNum)
+              .then(() => {
+                  res.redirect("/students");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/students");
+              });
+      });
+
+        app.get("/students/delete/:studentNum", (req, res) => {
+          const studentNum = parseInt(req.params.studentNum);
+          collegeData.deleteStudent(studentNum)
+              .then(() => {
+                  res.redirect("/students");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/students");
+              });
+      });
+
+        app.post("/students/delete", (req, res) => {
+          collegeData.deleteStudent(parseInt(req.body.studentNum))
+              .then(() => {
+                  res.redirect("/students");
+              })
+              .catch((error) => {
+                  console.error(error);
+                  res.redirect("/students");
+              });
+      });
+
+        app.get("/theme.css", (req,res) => {
+            res.sendFile(path.join(__dirname, "/css/theme.css"))
         });
         
         
@@ -153,9 +267,4 @@ collegeData.initialize()
     })
     .catch((error) => {
         console.error(error);
-    });
-
-
-    app.get('/theme.css', (req, res)=>{
-        res.sendFile(path.join(__dirname, "/css/theme.css"));
     });
